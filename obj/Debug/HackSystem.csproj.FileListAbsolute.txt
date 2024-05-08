@@ -36,4 +36,3 @@ C:\Users\stepa\RiderProjects\HackSystem\HackSystem\bin\Debug\Exiled.Permissions.
 C:\Users\stepa\RiderProjects\HackSystem\HackSystem\obj\Debug\HackSystem.csproj.CopyComplete
 C:\Users\stepa\RiderProjects\HackSystem\HackSystem\obj\Debug\HackSystem.dll
 C:\Users\stepa\RiderProjects\HackSystem\HackSystem\obj\Debug\HackSystem.pdb
-C:\Users\stepa\RiderProjects\HackSystem\HackSystem\bin\Debug\AdvancedHintsSvelout.dll

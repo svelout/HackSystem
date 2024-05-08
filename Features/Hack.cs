@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Security.Permissions;
 using AdvancedHintsSvelout;
+using CommandSystem;
 using Exiled.API.Enums;
 using Exiled.API.Features;
 using Exiled.API.Features.Doors;
@@ -103,6 +104,8 @@ internal sealed class Hack
             Timing.KillCoroutines(_progressBarCoroutine);
             _progressBarCoroutine.Tag = null;
         }
+
+        IsHacking = false;
     }
 
     private IEnumerator<float> CooldownWaiter(Player player)
@@ -126,14 +129,27 @@ internal sealed class Hack
 
     private IEnumerator<float> ProgressBar(Player player)
     {
-        float time = Plugin.Instance.Config.CustomHackTime.ContainsKey(Target.Type) 
-            ? (float)Plugin.Instance.Config.CustomHackTime[Target.Type] 
-            : (float)Plugin.Instance.Config.InternalHackTime;
+        float time = Plugin.Instance.Config.CustomHackDuration.ContainsKey(Target.Type) 
+            ? (float)Plugin.Instance.Config.CustomHackDuration[Target.Type] 
+            : (float)Plugin.Instance.Config.InternalHackDuration;
         float loadingSpeed = time / _fullLoadingSymbolsCount;
         string message = Plugin.Instance.Config.CurrentHackingText + '\n';
         Vector3 playerPos = player.Position;
+        var roleToRoll = Plugin.Instance.Config.CustomChanceRoles.ContainsKey(player.Role)
+            ? player.Role
+            : null;
+        var itemToRoll = roleToRoll == null && player.CurrentItem != null &&
+                         Plugin.Instance.Config.CustomChanceItems.ContainsKey(player.CurrentItem.Type)
+            ? player.CurrentItem
+            : null;
+        var doorToRoll = itemToRoll == null && Plugin.Instance.Config.CustomChanceDoors.ContainsKey(Target.Type)
+            ? Target
+            : null;
         int? posToStop = Plugin.Instance.Config.ChancesEnabled
-            ? Target.RollHack() ? (int)Random.Range(3f, _fullLoadingSymbolsCount) : null
+            ? (roleToRoll != null ? roleToRoll.RollHack() : itemToRoll != null 
+                ? itemToRoll.RollHack() : doorToRoll != null 
+                ? doorToRoll.RollHack() : Plugin.Instance.Config.HackChance.RollHack())
+                ? (int)Random.Range(3f, _fullLoadingSymbolsCount) : null
             : null;
         bool isSucccessed = true;
         for (int i = 0; i <= _fullLoadingSymbolsCount; i++)
@@ -151,7 +167,7 @@ internal sealed class Hack
                 yield break;
             }
             message += _loadingSymbol;
-            player.ShowManagedHint(message, 0.5f, overrideQueue: true);
+            player.ShowManagedHint(message, loadingSpeed + 0.5f, overrideQueue: true);
             yield return Timing.WaitForSeconds(loadingSpeed);
         }
         player.ShowManagedHint(string.Empty, 1f, overrideQueue: false);

@@ -8,10 +8,12 @@ using Exiled.API.Features.Doors;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
 using HackSystem.Features;
+using Interactables.Interobjects.DoorUtils;
 using MEC;
 using PlayerRoles;
 using Utils.NonAllocLINQ;
 using YamlDotNet.Core.Tokens;
+using KeycardPermissions = Exiled.API.Enums.KeycardPermissions;
 
 namespace HackSystem
 {
@@ -26,7 +28,7 @@ namespace HackSystem
                 foreach (var doorType in Plugin.Instance.Config.DoorsToLock)
                 {
                     var door = Door.Get(doorType);
-                    door.ChangeLock(DoorLockType.AdminCommand);
+                    door.KeycardPermissions = KeycardPermissions.AlphaWarhead;
                 }
             }
         }
@@ -34,6 +36,11 @@ namespace HackSystem
         // Игрок взаимодействует с дверью (до основного кода)
         public void OnInteractingDoors(InteractingDoorEventArgs ev)
         {
+            if (ev.Player.CurrentItem?.Type == ItemType.KeycardO5 && Plugin.Instance.Config.DoorsToLock.Contains(ev.Door.Type))
+            {
+                ev.IsAllowed = false;
+            }
+
             // Проверка закрыта ли дверь
             if (!ev.IsAllowed && !ev.Door.IsOpen && (Hack.Get(ev.Door) == null || !Hack.Get(ev.Door).IsHacking))
             {

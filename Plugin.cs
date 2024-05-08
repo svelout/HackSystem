@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Exiled.API.Features;
 using Exiled.API.Interfaces;
 using ServerOutput;
@@ -14,6 +15,8 @@ namespace HackSystem
         public override string Name => "HackSystem";
         
         public override string Prefix => "hack_system";
+
+        public override Version Version => new(1, 0, 0);
 
         public static Plugin Instance;
         private EventHandlers eh;
